@@ -6,7 +6,7 @@ export interface IDataField {
     default?: any;
     validate?: TValidator;
     buildData?: (value: any, data: Record<string, any>, model: Object) => any;
-    type?: () => IModelClass;
+    type?: () => Function;
     wrapper?: Class;
     wrap?: (value: any) => any;
 }
@@ -22,7 +22,7 @@ export interface IOptions<T = Object> {
     default?: any;
     validate?: TValidator;
     buildData?: (value: any, data: Record<string, any>, model: T) => any;
-    type?: () => IModelClass;
+    type?: () => Function;
     wrapper?: Class;
     wrap?: (value: any) => any;
 }
