@@ -1,6 +1,6 @@
 {
   "name": "cellx-state",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "",
   "main": "dist/CellxState.js",
   "typings": "dist/CellxState.d.ts",
