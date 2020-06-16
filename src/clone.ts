@@ -22,7 +22,7 @@ export function clone(value: any): any {
 		return cloneArray(value);
 	}
 	if (typeof value.clone == 'function') {
-		return value.clone.length ? value.clone(true) : value.clone();
+		return value.clone(true);
 	}
 
 	let copy = {};

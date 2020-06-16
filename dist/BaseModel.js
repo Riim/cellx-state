@@ -37,25 +37,16 @@ export class BaseModel extends EventEmitter {
         if (id) {
             cloned.set(id, copy);
         }
-        for (let name in this) {
-            if (name.charAt(0) == '_' || name.charAt(0) == '$') {
-                continue;
-            }
+        let dataFields = this.$dataFields;
+        for (let name in dataFields) {
             let value = this[name];
-            if (value === Object.prototype[name]) {
-                continue;
-            }
             if (name == 'id') {
                 copy.id = `copy-${nextUID()}-[${value}]`;
             }
-            else if (typeof value != 'function' &&
-                !(value instanceof Cell) &&
-                value !== copy[name]) {
+            else if (value !== copy[name]) {
                 copy[name] =
                     value && typeof value == 'object' && value.clone
-                        ? value.clone.length
-                            ? value.clone(true)
-                            : value.clone()
+                        ? value.clone(true)
                         : value;
             }
         }

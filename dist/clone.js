@@ -18,7 +18,7 @@ export function clone(value) {
         return cloneArray(value);
     }
     if (typeof value.clone == 'function') {
-        return value.clone.length ? value.clone(true) : value.clone();
+        return value.clone(true);
     }
     let copy = {};
     for (let key in value) {
