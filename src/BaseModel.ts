@@ -54,18 +54,20 @@ export class BaseModel extends EventEmitter implements IModelClass {
 			cloned!.set(id, copy);
 		}
 
-		let dataFields = this.$dataFields;
+		let dataFields = (this.constructor as IModelClass).$dataFields;
 
-		for (let name in dataFields) {
-			let value = this[name];
+		if (dataFields) {
+			for (let name in dataFields) {
+				let value = this[name];
 
-			if (name == 'id') {
-				copy.id = `copy-${nextUID()}-[${value}]`;
-			} else if (value !== (copy as any)[name]) {
-				(copy as any)[name] =
-					value && typeof value == 'object' && (value as any).clone
-						? (value as any).clone(true)
-						: value;
+				if (name == 'id') {
+					copy.id = `copy-${nextUID()}-[${value}]`;
+				} else if (value !== (copy as any)[name]) {
+					(copy as any)[name] =
+						value && typeof value == 'object' && (value as any).clone
+							? (value as any).clone(true)
+							: value;
+				}
 			}
 		}
 
@@ -105,7 +107,7 @@ export class BaseModel extends EventEmitter implements IModelClass {
 
 		absorbed!.add(this);
 
-		let dataFields = this.$dataFields;
+		let dataFields = (this.constructor as IModelClass).$dataFields;
 		let changed = false;
 
 		if (dataFields) {

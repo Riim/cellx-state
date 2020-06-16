@@ -37,17 +37,19 @@ export class BaseModel extends EventEmitter {
         if (id) {
             cloned.set(id, copy);
         }
-        let dataFields = this.$dataFields;
-        for (let name in dataFields) {
-            let value = this[name];
-            if (name == 'id') {
-                copy.id = `copy-${nextUID()}-[${value}]`;
-            }
-            else if (value !== copy[name]) {
-                copy[name] =
-                    value && typeof value == 'object' && value.clone
-                        ? value.clone(true)
-                        : value;
+        let dataFields = this.constructor.$dataFields;
+        if (dataFields) {
+            for (let name in dataFields) {
+                let value = this[name];
+                if (name == 'id') {
+                    copy.id = `copy-${nextUID()}-[${value}]`;
+                }
+                else if (value !== copy[name]) {
+                    copy[name] =
+                        value && typeof value == 'object' && value.clone
+                            ? value.clone(true)
+                            : value;
+                }
             }
         }
         copy.$original = this.$original;
@@ -75,7 +77,7 @@ export class BaseModel extends EventEmitter {
             return false;
         }
         absorbed.add(this);
-        let dataFields = this.$dataFields;
+        let dataFields = this.constructor.$dataFields;
         let changed = false;
         if (dataFields) {
             for (let name in dataFields) {
