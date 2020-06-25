@@ -49,12 +49,6 @@ export function DataField(arg1, arg2, options) {
             dataField.validate = validate;
         }
         if (options) {
-            if (options.wrapper) {
-                dataField.wrapper = options.wrapper;
-            }
-            if (options.type) {
-                dataField.type = options.type;
-            }
             if (options.placeholder !== undefined) {
                 dataField.placeholder = options.placeholder;
             }
@@ -63,6 +57,15 @@ export function DataField(arg1, arg2, options) {
             }
             if (options.buildData) {
                 dataField.buildData = options.buildData;
+            }
+            if (options.type) {
+                dataField.type = options.type;
+            }
+            if (options.wrapper) {
+                dataField.wrapper = options.wrapper;
+            }
+            if (options.wrap) {
+                dataField.wrap = options.wrap;
             }
         }
     };
