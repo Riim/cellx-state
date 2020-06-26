@@ -56,7 +56,7 @@ export class CellxState {
 	model<T extends BaseModel | Array<BaseModel>>(
 		type: Function,
 		data: Record<string, any> | Array<Record<string, any>>,
-		model?: BaseModel,
+		model?: BaseModel | null,
 		_prevModel?: BaseModel | null
 	): T {
 		if (Array.isArray(data)) {
@@ -183,7 +183,7 @@ export class CellxState {
 					}
 
 					if (typeof value == 'object' && dataField.type) {
-						value = this.model(dataField.type() as any, value, model![name]);
+						value = this.model(dataField.type() as any, value, null, model![name]);
 					}
 
 					if (dataField.wrapper) {

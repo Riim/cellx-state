@@ -137,7 +137,7 @@ export class CellxState {
                         value = dataField.buildData(value, data, model);
                     }
                     if (typeof value == 'object' && dataField.type) {
-                        value = this.model(dataField.type(), value, model[name]);
+                        value = this.model(dataField.type(), value, null, model[name]);
                     }
                     if (dataField.wrapper) {
                         value =

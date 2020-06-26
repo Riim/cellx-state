@@ -9,7 +9,7 @@ export declare class CellxState {
     get<T extends BaseModel = BaseModel>(type: Function, id?: Array<any>): Array<T | null>;
     getAll<T extends BaseModel = BaseModel>(type: Function): Array<T>;
     set(type: Function, model: BaseModel): this;
-    model<T extends BaseModel | Array<BaseModel>>(type: Function, data: Record<string, any> | Array<Record<string, any>>, model?: BaseModel, _prevModel?: BaseModel | null): T;
+    model<T extends BaseModel | Array<BaseModel>>(type: Function, data: Record<string, any> | Array<Record<string, any>>, model?: BaseModel | null, _prevModel?: BaseModel | null): T;
     discard(type: Function, id?: any): boolean;
     discard(model: BaseModel): boolean;
     clear(): this;
