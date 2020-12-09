@@ -2,8 +2,6 @@ import { keypath } from '@riim/keypath';
 import { error } from '@riim/log';
 import om from 'omyumyum';
 import { clone } from './clone';
-export { DataField } from './DataField';
-export { BaseModel } from './BaseModel';
 export class CellxState {
     constructor(initialize) {
         this._models = new Map();
@@ -52,8 +50,7 @@ export class CellxState {
         let idDataField = dataFields === null || dataFields === void 0 ? void 0 : dataFields.id;
         let id;
         if (idDataField) {
-            let idKeypath = idDataField.keypath;
-            id = idKeypath && keypath(idKeypath, data);
+            id = keypath(idDataField.keypath, data);
             if (idDataField.validate) {
                 try {
                     om(idDataField.validate, id);
@@ -62,7 +59,7 @@ export class CellxState {
                     error(err, {
                         modelName: type.name,
                         dataFieldName: 'id',
-                        dataFieldKeypath: idKeypath,
+                        dataFieldKeypath: idDataField.keypath,
                         value: JSON.stringify(id)
                     });
                 }
@@ -76,7 +73,7 @@ export class CellxState {
             }
         }
         else {
-            if (!id && _prevModel) {
+            if (_prevModel && !id) {
                 model = _prevModel;
             }
             else {
@@ -90,77 +87,74 @@ export class CellxState {
                 }
             }
         }
-        if (dataFields) {
-            for (let name in dataFields) {
-                if (name == 'id') {
-                    continue;
-                }
-                let dataField = dataFields[name];
-                if (dataField.keypath === undefined) {
-                    throw new TypeError('dataField.keypath is required');
-                }
-                let value = keypath(typeof dataField.keypath == 'function'
-                    ? dataField.keypath(data, model)
-                    : dataField.keypath, data);
-                if (value === null && dataField.placeholder !== undefined) {
-                    model[name] =
-                        typeof dataField.placeholder == 'function'
-                            ? dataField.placeholder()
-                            : clone(dataField.placeholder);
-                    continue;
-                }
-                if (value === undefined && dataField.default !== undefined) {
+        for (let name in dataFields) {
+            if (name == 'id') {
+                continue;
+            }
+            let dataField = dataFields[name];
+            if (dataField === Object.prototype[name]) {
+                continue;
+            }
+            let value = keypath(typeof dataField.keypath == 'function'
+                ? dataField.keypath(data, model)
+                : dataField.keypath, data);
+            if (value === null && dataField.placeholder !== undefined) {
+                model[name] =
+                    typeof dataField.placeholder == 'function'
+                        ? dataField.placeholder()
+                        : clone(dataField.placeholder);
+                continue;
+            }
+            if (value === undefined) {
+                if (dataField.default !== undefined) {
                     model[name] =
                         typeof dataField.default == 'function'
                             ? dataField.default()
                             : clone(dataField.default);
-                    continue;
                 }
-                if (dataField.validate) {
-                    try {
-                        om(dataField.validate, value);
-                    }
-                    catch (err) {
-                        error(err, {
-                            modelName: type.name,
-                            dataFieldName: name,
-                            dataFieldKeypath: dataField.keypath,
-                            value: JSON.stringify(value)
-                        });
-                    }
+                continue;
+            }
+            if (dataField.validate) {
+                try {
+                    om(dataField.validate, value);
                 }
-                if (value === undefined) {
-                    continue;
+                catch (err) {
+                    error(err, {
+                        modelName: type.name,
+                        dataFieldName: name,
+                        dataFieldKeypath: dataField.keypath,
+                        value: JSON.stringify(value)
+                    });
                 }
-                if (value !== null) {
-                    if (dataField.buildData) {
-                        value = dataField.buildData(value, data, model);
-                    }
-                    if (typeof value == 'object' && dataField.type) {
-                        value = this.model(dataField.type(), value, null, model[name]);
-                    }
-                    if (dataField.wrapper) {
-                        value =
-                            typeof dataField.wrapper.from == 'function'
-                                ? dataField.wrapper.from(value)
-                                : new dataField.wrapper(value);
-                    }
-                    else if (dataField.wrap) {
-                        value = dataField.wrap(value);
-                    }
+            }
+            if (value !== null) {
+                if (dataField.buildData) {
+                    value = dataField.buildData(value, data, model);
                 }
-                if (model[name] !== value) {
-                    if (value &&
-                        model[name] &&
-                        typeof value == 'object' &&
-                        typeof model[name] == 'object' &&
-                        value.absorbFrom &&
-                        value.absorbFrom === model[name].absorbFrom) {
-                        model[name].absorbFrom(value);
-                    }
-                    else {
-                        model[name] = value;
-                    }
+                if (typeof value == 'object' && dataField.type) {
+                    value = this.model(dataField.type(), value, null, model[name]);
+                }
+                if (dataField.wrapper) {
+                    value =
+                        typeof dataField.wrapper.from == 'function'
+                            ? dataField.wrapper.from(value)
+                            : new dataField.wrapper(value);
+                }
+                else if (dataField.wrap) {
+                    value = dataField.wrap(value);
+                }
+            }
+            if (model[name] !== value) {
+                if (value &&
+                    model[name] &&
+                    typeof value == 'object' &&
+                    typeof model[name] == 'object' &&
+                    value.absorbFrom &&
+                    value.absorbFrom === model[name].absorbFrom) {
+                    model[name].absorbFrom(value);
+                }
+                else {
+                    model[name] = value;
                 }
             }
         }

@@ -42,9 +42,9 @@ export function DataField(arg1, arg2, options) {
     return (target, propName) => {
         let dataFields = getDataFields(target.constructor);
         let dataField = (dataFields[propName] = {
-            __proto__: dataFields[propName] || Object.prototype
+            __proto__: dataFields[propName] || Object.prototype,
+            keypath: keypath !== undefined ? keypath : propName
         });
-        dataField.keypath = keypath !== undefined ? keypath : propName;
         if (validate) {
             dataField.validate = validate;
         }

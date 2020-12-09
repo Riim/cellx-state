@@ -1,6 +1,4 @@
 import { BaseModel } from './BaseModel';
-export { IDataField, IDataFields, IModelClass, IOptions, DataField } from './DataField';
-export { BaseModel } from './BaseModel';
 export declare class CellxState {
     _models: Map<Function, Map<any, BaseModel>>;
     initialize?: () => void;

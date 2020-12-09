@@ -2,7 +2,7 @@ import { IType, TValidator } from 'omyumyum';
 import { Class } from 'type-fest';
 
 export interface IDataField {
-	keypath?: string | ((data: Record<string, any>, model: Object) => string);
+	keypath: string | ((data: Record<string, any>, model: Object) => string);
 	placeholder?: any;
 	default?: any;
 	validate?: TValidator;
@@ -102,10 +102,9 @@ export function DataField(
 	return (target: Object, propName: string): any => {
 		let dataFields = getDataFields(target.constructor as any);
 		let dataField: IDataField = (dataFields[propName] = {
-			__proto__: dataFields[propName] || Object.prototype
+			__proto__: dataFields[propName] || Object.prototype,
+			keypath: keypath !== undefined ? keypath : propName
 		} as any);
-
-		dataField.keypath = keypath !== undefined ? keypath : propName;
 
 		if (validate) {
 			dataField.validate = validate;

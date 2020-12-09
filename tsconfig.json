@@ -16,6 +16,6 @@
 		"target": "es2017"
 	},
 	"files": [
-		"src/CellxState.ts"
+		"src/index.ts"
 	]
 }

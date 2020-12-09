@@ -5,9 +5,6 @@ import { BaseModel } from './BaseModel';
 import { clone } from './clone';
 import { IModelClass } from './DataField';
 
-export { IDataField, IDataFields, IModelClass, IOptions, DataField } from './DataField';
-export { BaseModel } from './BaseModel';
-
 export class CellxState {
 	_models: Map<Function, Map<any, BaseModel>> = new Map();
 
@@ -82,9 +79,7 @@ export class CellxState {
 		let id: any;
 
 		if (idDataField) {
-			let idKeypath = idDataField.keypath;
-
-			id = idKeypath && keypath(idKeypath as string, data);
+			id = keypath(idDataField.keypath as string, data);
 
 			if (idDataField.validate) {
 				try {
@@ -93,7 +88,7 @@ export class CellxState {
 					error(err, {
 						modelName: type.name,
 						dataFieldName: 'id',
-						dataFieldKeypath: idKeypath,
+						dataFieldKeypath: idDataField.keypath,
 						value: JSON.stringify(id)
 					});
 				}
@@ -107,7 +102,7 @@ export class CellxState {
 				models.set(id, model);
 			}
 		} else {
-			if (!id && _prevModel) {
+			if (_prevModel && !id) {
 				model = _prevModel;
 			} else {
 				model = id && models.get(id);
@@ -123,92 +118,88 @@ export class CellxState {
 			}
 		}
 
-		if (dataFields) {
-			for (let name in dataFields) {
-				if (name == 'id') {
-					continue;
-				}
+		for (let name in dataFields) {
+			if (name == 'id') {
+				continue;
+			}
 
-				let dataField = dataFields[name];
+			let dataField = dataFields[name];
 
-				if (dataField.keypath === undefined) {
-					throw new TypeError('dataField.keypath is required');
-				}
+			if (dataField === Object.prototype[name]) {
+				continue;
+			}
 
-				let value = keypath(
-					typeof dataField.keypath == 'function'
-						? dataField.keypath(data, model!)
-						: dataField.keypath,
-					data
-				);
+			let value = keypath(
+				typeof dataField.keypath == 'function'
+					? dataField.keypath(data, model!)
+					: dataField.keypath,
+				data
+			);
 
-				if (value === null && dataField.placeholder !== undefined) {
-					model![name] =
-						typeof dataField.placeholder == 'function'
-							? dataField.placeholder()
-							: clone(dataField.placeholder);
+			if (value === null && dataField.placeholder !== undefined) {
+				model![name] =
+					typeof dataField.placeholder == 'function'
+						? dataField.placeholder()
+						: clone(dataField.placeholder);
 
-					continue;
-				}
+				continue;
+			}
 
-				if (value === undefined && dataField.default !== undefined) {
+			if (value === undefined) {
+				if (dataField.default !== undefined) {
 					model![name] =
 						typeof dataField.default == 'function'
 							? dataField.default()
 							: clone(dataField.default);
-
-					continue;
 				}
 
-				if (dataField.validate) {
-					try {
-						om(dataField.validate, value);
-					} catch (err) {
-						error(err, {
-							modelName: type.name,
-							dataFieldName: name,
-							dataFieldKeypath: dataField.keypath,
-							value: JSON.stringify(value)
-						});
-					}
+				continue;
+			}
+
+			if (dataField.validate) {
+				try {
+					om(dataField.validate, value);
+				} catch (err) {
+					error(err, {
+						modelName: type.name,
+						dataFieldName: name,
+						dataFieldKeypath: dataField.keypath,
+						value: JSON.stringify(value)
+					});
+				}
+			}
+
+			if (value !== null) {
+				if (dataField.buildData) {
+					value = dataField.buildData(value, data, model!);
 				}
 
-				if (value === undefined) {
-					continue;
+				if (typeof value == 'object' && dataField.type) {
+					value = this.model(dataField.type() as any, value, null, model![name]);
 				}
 
-				if (value !== null) {
-					if (dataField.buildData) {
-						value = dataField.buildData(value, data, model!);
-					}
-
-					if (typeof value == 'object' && dataField.type) {
-						value = this.model(dataField.type() as any, value, null, model![name]);
-					}
-
-					if (dataField.wrapper) {
-						value =
-							typeof (dataField.wrapper as any).from == 'function'
-								? (dataField.wrapper as any).from(value)
-								: new dataField.wrapper(value);
-					} else if (dataField.wrap) {
-						value = dataField.wrap(value);
-					}
+				if (dataField.wrapper) {
+					value =
+						typeof (dataField.wrapper as any).from == 'function'
+							? (dataField.wrapper as any).from(value)
+							: new dataField.wrapper(value);
+				} else if (dataField.wrap) {
+					value = dataField.wrap(value);
 				}
+			}
 
-				if (model![name] !== value) {
-					if (
-						value &&
-						model![name] &&
-						typeof value == 'object' &&
-						typeof model![name] == 'object' &&
-						value.absorbFrom &&
-						value.absorbFrom === model![name].absorbFrom
-					) {
-						model![name].absorbFrom(value);
-					} else {
-						model![name] = value;
-					}
+			if (model![name] !== value) {
+				if (
+					value &&
+					model![name] &&
+					typeof value == 'object' &&
+					typeof model![name] == 'object' &&
+					value.absorbFrom &&
+					value.absorbFrom === model![name].absorbFrom
+				) {
+					model![name].absorbFrom(value);
+				} else {
+					model![name] = value;
 				}
 			}
 		}
@@ -228,6 +219,7 @@ export class CellxState {
 				}
 
 				models.clear();
+
 				return true;
 			}
 		} else {

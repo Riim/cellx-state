@@ -1,7 +1,7 @@
 import { TValidator } from 'omyumyum';
 import { Class } from 'type-fest';
 export interface IDataField {
-    keypath?: string | ((data: Record<string, any>, model: Object) => string);
+    keypath: string | ((data: Record<string, any>, model: Object) => string);
     placeholder?: any;
     default?: any;
     validate?: TValidator;
